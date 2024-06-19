@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deposit Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map = L.map('map');
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            map.setView([lat, lon], 12);
+        }, function() {
+            map.setView([18.7883, 98.9853], 12);
+        });
+    } else {
+        map.setView([18.7883, 98.9853], 12);
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    function loadPoints() {
+        var bounds = map.getBounds();
+        var bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+
+        fetch(`/api/points?bounds=${bbox.join(',')}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(point => {
+                    var commoditiesHtml = point.commodities.map(commodity => `<li>${commodity}</li>`).join('');
+                    var popupContent = `<b>${point.name}</b><br><ul>${commoditiesHtml}</ul>`;
+                    L.marker([point.coordinates[1], point.coordinates[0]]).addTo(map)
+                        .bindPopup(popupContent);
+                });
+            });
+    }
+
+    map.on('moveend', loadPoints);
+    loadPoints();
+</script>
+</body>
+</html>
