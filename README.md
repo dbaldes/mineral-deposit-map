@@ -39,6 +39,8 @@ mvn spring-boot:run -Dstart-class=de.throughput.deposit.web.DepositWebApplicatio
 
 And navigate to http://localhost:8080/ to view the map.
 
+![Example deposit](docs/map-example.png)
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
